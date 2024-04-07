@@ -1,0 +1,164 @@
+{
+"pickup_engine_v8_ecu_race_adjustableIdle": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"Adjustable Idle Race ECU",
+        "value":3700,
+    },
+    "slotType" : "pickup_engine_v8_ecu",
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description"],
+        ["$revLimiterRPM", "range", "rpm", "Engine", 5800, 3500, 9950, "RPM Limit", "RPM where the rev limiter prevents further revving. Set to 9950 for hilarity", {"stepDis":50}],
+        ["$revLimiterCutTime", "range", "s", "Engine", 0.15, 0.01, 0.5, "RPM Limit Cut Time", "How fast the rev limiter cycles", {"stepDis":0.01}],
+        ["$idleRPMSet", "range", "rpm", "Engine", 900, 300, 5000, "Idle RPM", "How short do you want your throttle cable?", {"stepDis":0.01}],
+        ["$highShiftUpRPM", "range", "rpm", "Engine", 5000, 3000, 9000, "Automatic Shift-up RPM", "Assuming you use automatic, this dictates your shift-up rpm", {"stepDis":0.01}],
+    ],
+    "controller": [
+        ["fileName"],
+        ["twoStepLaunch", {"rpmLimit":4000}],
+    ],
+    "mainEngine":{
+        "idleRPM":"$idleRPMSet",
+        "revLimiterRPM":"$revLimiterRPM",
+        "revLimiterType":"timeBased",
+        "revLimiterCutTime":"$revLimiterCutTime",
+    },
+    "vehicleController": {
+        "highShiftUpRPM":"$highShiftUpRPM",
+    },
+},
+"pickup_transmission_CVT_Configurable": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"Carp Virtuous Transmissionual stolen from Hero Cheatsome Bros",
+        "value":5200,
+    },
+    "slotType" : "pickup_transmission",
+    "slots": [
+        ["type", "default", "description"],
+        ["pickup_transfer_case","pickup_transfer_case_4WD","Transfer Case", {"coreSlot":true}],
+    ],
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
+        ["$cvtRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 4500, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
+        ["$cvtAggressionRate", "range", "rpm", "Engine", 0.5, 0.01, 1.5, "Throttle Aggression", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "rpm", "Engine", 0.1, 0.01, 1.5, "Throttle Regression", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtGearRatio", "range", "rpm", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
+        ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 8500, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
+        ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
+        //these dont seem to do anything
+        ["$cvtThrottleCurve2", "range", "x", "Engine", 0.4, 0.01, 0.99, "Throttle Target RPM Curve 1", "Weaker Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve3", "range", "x", "Engine", 0.55, 0.01, 0.99, "Throttle Target RPM Curve 2", "Middle Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve4", "range", "x", "Engine", 0.78, 0.01, 0.99, "Throttle Target RPM Curve 3", "Stronger Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+    ],
+    "powertrain": [
+        ["type", "name", "inputName", "inputIndex"],
+        ["torqueConverter", "torqueConverter", "mainEngine", 1],
+        ["cvtGearbox", "gearbox", "torqueConverter", 1],
+    ],
+    "torqueConverter": {
+        "uiName":"Torque Converter",
+        "converterDiameter": 0.285,
+        "converterStiffness":7,
+        "couplingAVRatio":0.85,
+        "stallTorqueRatio":1.75,
+        "additionalEngineInertia":0.18,
+    },
+    "gearbox": {
+        "uiName":"Gearbox",
+        "minGearRatio":"$=$cvtGearRatio",
+        "maxGearRatio":"$=$cvtGearRatio*3.85",
+        "friction": 1.58,
+        "dynamicFriction": 0.00091,
+        "torqueLossCoef": 0.015,
+        "oneWayViscousCoef":60,
+        "parkLockTorque":2500,
+        "gearboxNode:":["tra1"],
+    },
+    "vehicleController": {
+        "automaticModes":"PRND",
+        "cvtHighRPM":"$cvtRPM",
+        "cvtLowRPM":"$cvtlowRPM",
+        "torqueConverterLockupRPM": "$clutchEndRPM",
+        "aggressionSmoothingDown":"$cvtRegressionRate",
+        "cvtAggression":"$cvtAggresionRate",
+        "aggressionHoldOffThrottleDelay":"$cvtRegressionDelay",
+    },
+    /*
+    "flexbodies": [
+         ["mesh", "[group]:", "nonFlexMaterials"],
+         ["sunburst_transmission_awd", ["sunburst_engine","sunburst_transmission"]],
+         ["sunburst_auto", ["sunburst_body"]],
+    ],
+    */
+    
+    "flexbodies": [
+        ["mesh", "[group]:", "nonFlexMaterials"],
+        ["gavril_v8_pickup_transmission", ["pickup_engine","pickup_transmission"]],
+    ],
+    "controller": [
+        ["fileName"],
+        ["propAnimation/singleAxisLever", {"name":"singleAxisLever"}],
+
+    ]
+    "singleAxisLever": {
+        "gearCoordinates": [
+            ["gearIndex",   "value"]
+            [1,            0.0]
+            [2,             "$cvtThrottleCurve2"]
+            [3,             "$cvtThrottleCurve3"]
+            [4,             "$cvtThrottleCurve4"]
+            [5,             1.0]
+        ]
+        "shiftSoundNode:":["f2r"]
+        "shiftSoundEventSingleAxisLever": "event:>Vehicle>Interior>Gearshift>automatic_02",
+        "shiftSoundVolumeSingleAxisLever": 0.5,
+    },
+    "props": [
+        ["func",    "mesh",                  "idRef:","idX:","idY:", "baseRotation",          "rotation",              "translation",             "min", "max", "offset", "multiplier"],
+        //displays
+        ["disp_P_cvt", "sunburst_displayP",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_R_cvt", "sunburst_displayR",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_N_cvt", "sunburst_displayN",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_D_cvt", "sunburst_displayD",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_L_cvt", "sunburst_displayL",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["gearModeIndex",  "sunburst_shifter_auto", "f7r","f7l","f8r",      {"x":90, "y":0, "z":0},  {"x":0, "y":0, "z":0.1}, {"x":0, "y":0.14, "z":0},  0, 1, -0.12, 1],
+    ],
+    "nodes": [
+         ["id", "posX", "posY", "posZ"],
+         //--CVT--
+         {"selfCollision":false},
+         {"collision":true},
+         {"nodeMaterial":"|NM_METAL"},
+         {"frictionCoef":0.5},
+         {"group":"pickup_transmission"},
+         {"nodeWeight":8.5},
+         ["tra1", 0.0, -0.41, 0.46],
+         {"group":""},
+    ],
+    "beams": [
+          ["id1:", "id2:"],
+          //--TRANSMISSION CONE--
+          {"beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+          {"beamSpring":12001000,"beamDamp":400},
+          {"beamDeform":250000,"beamStrength":"FLT_MAX"},
+          ["tra1l","e2r"],
+          ["tra1l","e4r"],
+          ["tra1l","e2l"],
+          ["tra1l","e4l"],
+          ["tra1r","e1r"],
+          ["tra1r","e3r"],
+          ["tra1r","e1l"],
+          ["tra1r","e3l"],
+          ["tra1r","tra1l"],
+          ["tra1","e1l"],
+          ["tra1","e2l"],
+          ["tra1","e4l"],
+          ["tra1","e3l"],
+          ["tra1","tra1l"],
+          ["tra1","tra1r"],
+          {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+    ],
+},
+}
