@@ -1,0 +1,293 @@
+{
+"sunburst_engine_ecu_race_configurable": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"Adjustable Race ECU with idle adjust",
+        "value":3900,
+    },
+    "slotType" : "sunburst_engine_ecu",
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
+        ["$revLimiterRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "RPM Limit", "RPM where the rev limiter prevents further revving", "ECU", {"stepDis":50}],
+        ["$revLimiterCutTime", "range", "s", "Engine", 0.10, 0.01, 0.5, "RPM Limit Cut Time", "How fast the rev limiter cycles", "ECU", {"stepDis":0.01}],
+        //["$cvtRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "CVT Maximum RPM", "Target RPM at maximum throttle", {"stepDis":50}],
+        ["$cvtIdleRPM", "range", "rpm", "Engine", 1000, 0, 8500, "Idle RPM", "Ever wanted to go full throttle without touching your pedals? Now you can!", "ECU", {"stepDis":50}],
+    ],
+    "controller": [
+        ["fileName"],
+        ["twoStepLaunch", {"rpmLimit":4100}],
+    ],
+    "mainEngine":{
+        "idleRPM":"$cvtIdleRPM",
+        "revLimiterRPM":"$revLimiterRPM",
+        "revLimiterType":"timeBased",
+        "revLimiterCutTime":"$revLimiterCutTime",
+        "$*instantAfterFireCoef": 1.25,
+        "$*sustainedAfterFireCoef": 1.25,
+    },
+    "vehicleController": {
+        "highShiftUpRPM":"$=$revLimiterRPM - 200",
+        //"cvtHighRPM":"$cvtRPM",//doesn't work thanks to part heiarchy which explains why cvt rpm doesnt change
+    },
+},
+"sunburst_transmission_CVT_Configurable": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"Race Configurable CVT",
+        "value":5200,
+    },
+    "slotType" : "sunburst_transmission",
+    "slots": [
+        ["type", "default", "description"],
+        ["sunburst_transfer_case","sunburst_transfer_case_FWD", "Transfer Case"],
+        ["sunburst_differential_F","sunburst_differential_F", "Front Differential"],
+    ],
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
+        ["$cvtRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 4500, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
+        ["$cvtAggressionRate", "range", "rpm", "Engine", 0.5, 0.01, 1.5, "Throttle Aggression", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "rpm", "Engine", 0.1, 0.01, 1.5, "Throttle Regression", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtGearRatio", "range", "rpm", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is about 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
+        ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 8500, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
+        ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
+        //these dont seem to do anything
+        ["$cvtThrottleCurve2", "range", "x", "Engine", 0.4, 0.01, 0.99, "Throttle Target RPM Curve 1", "Weaker Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve3", "range", "x", "Engine", 0.55, 0.01, 0.99, "Throttle Target RPM Curve 2", "Middle Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve4", "range", "x", "Engine", 0.78, 0.01, 0.99, "Throttle Target RPM Curve 3", "Stronger Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+    ],
+    "powertrain": [
+        ["type", "name", "inputName", "inputIndex"],
+        ["torqueConverter", "torqueConverter", "mainEngine", 1],
+        ["cvtGearbox", "gearbox", "torqueConverter", 1],
+    ],
+    "torqueConverter": {
+        "uiName":"Torque Converter",
+        "converterDiameter": 0.25,
+        "converterStiffness":10,
+        "couplingAVRatio":0.92,
+        "stallTorqueRatio":1.75,
+        "additionalEngineInertia":0.14,
+    },
+    "gearbox": {
+        "uiName":"Gearbox",
+        "minGearRatio":"$=$cvtGearRatio",
+        "maxGearRatio":"$=$cvtGearRatio*2.7/0.7",
+        "friction": 0.92,
+        "dynamicFriction": 0.00091,
+        "torqueLossCoef": 0.019,
+        "oneWayViscousCoef":30,
+        "parkLockTorque":2000,
+        "gearboxNode:":["tra1"],
+    },
+    "vehicleController": {
+        "automaticModes":"PRND",
+        "cvtHighRPM":"$cvtRPM",
+        "cvtLowRPM":"$cvtlowRPM",
+        "torqueConverterLockupRPM": "$clutchEndRPM",
+        "aggressionSmoothingDown":"$cvtRegressionRate",
+        "cvtAggression":"$cvtAggresionRate",
+        "aggressionHoldOffThrottleDelay":"$cvtRegressionDelay",
+    },
+    "flexbodies": [
+         ["mesh", "[group]:", "nonFlexMaterials"],
+         ["sunburst_transmission_awd", ["sunburst_engine","sunburst_transmission"]],
+         ["sunburst_auto", ["sunburst_body"]],
+    ],
+    "controller": [
+        ["fileName"],
+        ["propAnimation/singleAxisLever", {"name":"singleAxisLever"}],
+
+    ]
+    "singleAxisLever": {
+        "gearCoordinates": [
+            ["gearIndex",   "value"]
+            [1,            0.0]
+            [2,             "$cvtThrottleCurve2"]
+            [3,             "$cvtThrottleCurve3"]
+            [4,             "$cvtThrottleCurve4"]
+            [5,             1.0]
+        ]
+        "shiftSoundNode:":["f2r"]
+        "shiftSoundEventSingleAxisLever": "event:>Vehicle>Interior>Gearshift>automatic_02",
+        "shiftSoundVolumeSingleAxisLever": 0.5,
+    },
+    "props": [
+        ["func",    "mesh",                  "idRef:","idX:","idY:", "baseRotation",          "rotation",              "translation",             "min", "max", "offset", "multiplier"],
+        //displays
+        ["disp_P_cvt", "sunburst_displayP",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_R_cvt", "sunburst_displayR",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_N_cvt", "sunburst_displayN",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_D_cvt", "sunburst_displayD",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_L_cvt", "sunburst_displayL",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["gearModeIndex",  "sunburst_shifter_auto", "f7r","f7l","f8r",      {"x":90, "y":0, "z":0},  {"x":0, "y":0, "z":0.1}, {"x":0, "y":0.14, "z":0},  0, 1, -0.12, 1],
+    ],
+    "nodes": [
+         ["id", "posX", "posY", "posZ"],
+         //--CVT--
+         {"selfCollision":false},
+         {"collision":true},
+         {"nodeMaterial":"|NM_METAL"},
+         {"frictionCoef":0.5},
+         {"group":"sunburst_transmission"},
+         {"nodeWeight":8.5},
+         ["tra1r",-0.32, -1.31, 0.33],
+         ["tra1l", 0.32, -1.31, 0.33],
+         ["tra1", -0.2, -1.43, 0.22],
+         {"group":""},
+    ],
+    "beams": [
+          ["id1:", "id2:"],
+          //--TRANSMISSION CONE--
+          {"beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+          {"beamSpring":12001000,"beamDamp":400},
+          {"beamDeform":250000,"beamStrength":"FLT_MAX"},
+          ["tra1l","e2r"],
+          ["tra1l","e4r"],
+          ["tra1l","e2l"],
+          ["tra1l","e4l"],
+          ["tra1r","e1r"],
+          ["tra1r","e3r"],
+          ["tra1r","e1l"],
+          ["tra1r","e3l"],
+          ["tra1r","tra1l"],
+          ["tra1","e1l"],
+          ["tra1","e2l"],
+          ["tra1","e4l"],
+          ["tra1","e3l"],
+          ["tra1","tra1l"],
+          ["tra1","tra1r"],
+          {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+    ],
+},
+"sunburst_transmission_CVT_Configurable_CR4CKED": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"CR3CKED Configurable CVT",
+        "value":6942,
+    },
+    "slotType" : "sunburst_transmission",
+    "slots": [
+        ["type", "default", "description"],
+        ["sunburst_transfer_case","sunburst_transfer_case_FWD", "Transfer Case"],
+        ["sunburst_differential_F","sunburst_differential_F", "Front Differential"],
+    ],
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
+        ["$cvtRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 4500, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
+        ["$cvtAggressionRate", "range", "rpm", "Engine", 0.5, 0.01, 1.5, "Throttle Aggression", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "rpm", "Engine", 0.1, 0.01, 1.5, "Throttle Regression", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtGearRatio", "range", "rpm", "Engine", 0.7, 0.05, 2, "Torque Ratio", "Maximum torque ratio is about 10x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
+        ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 8500, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
+        ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
+        //these dont seem to do anything
+        ["$cvtThrottleCurve2", "range", "x", "Engine", 0.4, 0.01, 0.99, "Throttle Target RPM Curve 1", "Weaker Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve3", "range", "x", "Engine", 0.55, 0.01, 0.99, "Throttle Target RPM Curve 2", "Middle Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve4", "range", "x", "Engine", 0.78, 0.01, 0.99, "Throttle Target RPM Curve 3", "Stronger Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+    ],
+    "powertrain": [
+        ["type", "name", "inputName", "inputIndex"],
+        ["torqueConverter", "torqueConverter", "mainEngine", 1],
+        ["cvtGearbox", "gearbox", "torqueConverter", 1],
+    ],
+    "torqueConverter": {
+        "uiName":"Torque Converter",
+        "converterDiameter": 0.25,
+        "converterStiffness":10,
+        "couplingAVRatio":0.92,
+        "stallTorqueRatio":1.75,
+        "additionalEngineInertia":0.14,
+    },
+    "gearbox": {
+        "uiName":"Gearbox",
+        "minGearRatio":"$=$cvtGearRatio",
+        "maxGearRatio":"$=$cvtGearRatio*10",
+        "friction": 0.92,
+        "dynamicFriction": 0.00091,
+        "torqueLossCoef": 0.019,
+        "oneWayViscousCoef":30,
+        "parkLockTorque":2000,
+        "gearboxNode:":["tra1"],
+    },
+    "vehicleController": {
+        "automaticModes":"PRND",
+        "cvtHighRPM":"$cvtRPM",
+        "cvtLowRPM":"$cvtlowRPM",
+        "torqueConverterLockupRPM": "$clutchEndRPM",
+        "aggressionSmoothingDown":"$cvtRegressionRate",
+        "cvtAggression":"$cvtAggresionRate",
+        "aggressionHoldOffThrottleDelay":"$cvtRegressionDelay",
+    },
+    "flexbodies": [
+         ["mesh", "[group]:", "nonFlexMaterials"],
+         ["sunburst_transmission_awd", ["sunburst_engine","sunburst_transmission"]],
+         ["sunburst_auto", ["sunburst_body"]],
+    ],
+    "controller": [
+        ["fileName"],
+        ["propAnimation/singleAxisLever", {"name":"singleAxisLever"}],
+
+    ]
+    "singleAxisLever": {
+        "gearCoordinates": [
+            ["gearIndex",   "value"]
+            [1,            0.0]
+            [2,             "$cvtThrottleCurve2"]
+            [3,             "$cvtThrottleCurve3"]
+            [4,             "$cvtThrottleCurve4"]
+            [5,             1.0]
+        ]
+        "shiftSoundNode:":["f2r"]
+        "shiftSoundEventSingleAxisLever": "event:>Vehicle>Interior>Gearshift>automatic_02",
+        "shiftSoundVolumeSingleAxisLever": 0.5,
+    },
+    "props": [
+        ["func",    "mesh",                  "idRef:","idX:","idY:", "baseRotation",          "rotation",              "translation",             "min", "max", "offset", "multiplier"],
+        //displays
+        ["disp_P_cvt", "sunburst_displayP",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_R_cvt", "sunburst_displayR",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_N_cvt", "sunburst_displayN",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_D_cvt", "sunburst_displayD",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["disp_L_cvt", "sunburst_displayL",     "f7r","f7l","f8r",      {"x":225, "y":0, "z":0}, {"x":0, "y":0, "z":0},   {"x":0, "y":0.013, "z":0}, -1, 1, 0, 1],
+        ["gearModeIndex",  "sunburst_shifter_auto", "f7r","f7l","f8r",      {"x":90, "y":0, "z":0},  {"x":0, "y":0, "z":0.1}, {"x":0, "y":0.14, "z":0},  0, 1, -0.12, 1],
+    ],
+    "nodes": [
+         ["id", "posX", "posY", "posZ"],
+         //--CVT--
+         {"selfCollision":false},
+         {"collision":true},
+         {"nodeMaterial":"|NM_METAL"},
+         {"frictionCoef":0.5},
+         {"group":"sunburst_transmission"},
+         {"nodeWeight":8.5},
+         ["tra1r",-0.32, -1.31, 0.33],
+         ["tra1l", 0.32, -1.31, 0.33],
+         ["tra1", -0.2, -1.43, 0.22],
+         {"group":""},
+    ],
+    "beams": [
+          ["id1:", "id2:"],
+          //--TRANSMISSION CONE--
+          {"beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+          {"beamSpring":12001000,"beamDamp":400},
+          {"beamDeform":250000,"beamStrength":"FLT_MAX"},
+          ["tra1l","e2r"],
+          ["tra1l","e4r"],
+          ["tra1l","e2l"],
+          ["tra1l","e4l"],
+          ["tra1r","e1r"],
+          ["tra1r","e3r"],
+          ["tra1r","e1l"],
+          ["tra1r","e3l"],
+          ["tra1r","tra1l"],
+          ["tra1","e1l"],
+          ["tra1","e2l"],
+          ["tra1","e4l"],
+          ["tra1","e3l"],
+          ["tra1","tra1l"],
+          ["tra1","tra1r"],
+          {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+    ],
+},
+}
