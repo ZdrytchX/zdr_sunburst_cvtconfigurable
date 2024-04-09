@@ -1,0 +1,39 @@
+{
+  "0-100 km/h":"Transmission not certified for safe use at these speeds",
+  "0-60 mph":35,
+  "100-0 km/h":72,
+  "60-0 mph":216,
+  "BoundingBox":[
+    [
+      -0.36,
+      -1.261,
+      -0.2033
+    ],
+    [
+      1.08,
+      2.012,
+      1.27
+    ]
+  ],
+  "Braking G":0.553,
+  "Config Type":"Factory",
+  "Configuration":"Old Tooktook",
+  "Description":"An old used tuktuk from a south east asian country retrofitted with a malfunctioning CVT. Used by various government contractors, carrying up to 18 passengers.",
+  "Drivetrain":"RWD",
+  "Fuel Type":"Gasoline",
+  "Induction Type":"NA",
+  "Off-Road Score":41,
+  "Performance Class":"1",
+  "Population":500,
+  "Power":31,
+  "PowerPeakRPM":"5250 - 5850",
+  "Propulsion":"ICE",
+  "Top Speed":20,
+  "Torque":45,
+  "TorquePeakRPM":"2800 - 4650",
+  "Transmission":"Manual",
+  "Value":1200,
+  "Weight":625,
+  "Weight/Power":20.16129032,
+  "defaultPaintName1":"Verdant Green"
+}

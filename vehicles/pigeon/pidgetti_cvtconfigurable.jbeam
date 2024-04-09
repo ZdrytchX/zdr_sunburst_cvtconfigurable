@@ -1,0 +1,113 @@
+{
+"pidgetti_transmission_CVT_Configurable": {
+    "information":{
+        "authors":"ZdrytchX",
+        "name":"Scooter CVT",
+        "value":5200,
+    },
+    "slotType" : "pigeon_transmission",
+    "variables": [
+        ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
+        ["$cvtRPM", "range", "rpm", "Engine", 5800, 2500, 9500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 2500, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
+        ["$cvtAggressionRate", "range", "x", "Engine", 0.05, 0.01, 1.5, "Throttle Attack", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "x", "Engine", 0.05, 0.01, 1.5, "Throttle Retract", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtGearRatio", "range", "x", "Engine", 0.9, 0.25, 5, "Torque Ratio", "Maximum torque ratio is about 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
+        ["$clutchEndRPM", "range", "rpm", "Engine", 3500, 0, 9000, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
+        ["$cvtRegressionDelay", "range", "s", "Engine", 0.1, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
+        //these dont seem to do anything
+        ["$cvtThrottleCurve2", "range", "x", "Engine", 0.4, 0.01, 0.99, "Throttle Target RPM Curve 1", "Weaker Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve3", "range", "x", "Engine", 0.55, 0.01, 0.99, "Throttle Target RPM Curve 2", "Middle Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+        ["$cvtThrottleCurve4", "range", "x", "Engine", 0.78, 0.01, 0.99, "Throttle Target RPM Curve 3", "Stronger Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
+    ],
+    "powertrain": [
+        ["type", "name", "inputName", "inputIndex"],
+        ["torqueConverter", "torqueConverter", "mainEngine", 1],
+        ["cvtGearbox", "gearbox", "torqueConverter", 1],
+    ],
+    "torqueConverter": {
+        "uiName":"Torque Converter",
+        "converterDiameter": 0.15,
+        "converterStiffness":6,
+        "couplingAVRatio":0.8,
+        "stallTorqueRatio":1.75,
+        "additionalEngineInertia":0.13,
+    },
+    "gearbox": {
+        "uiName":"Gearbox",
+        "minGearRatio":"$=$cvtGearRatio",
+        "maxGearRatio":"$=$cvtGearRatio*3",
+        "friction": 0.37,
+        "dynamicFriction": 0.0005,
+        "torqueLossCoef": 0.016,
+        "oneWayViscousCoef":30,
+        "parkLockTorque":500,
+        "gearboxNode:":["tra1"],
+        "gearWhineCoefsInput":  [0.12,0,0.12,0.12],
+        "gearWhineCoefsOutput": [0.24,0.24,0.24,0.24],
+        "gearWhineInputEvent": "event:>Vehicle>Transmission>straight_01>twine_in_race_sq",
+        "gearWhineOutputEvent": "event:>Vehicle>Transmission>straight_01>twine_out_race_sq",
+    },
+    "vehicleController": {
+        "automaticModes":"RND",
+        "cvtHighRPM":"$cvtRPM",
+        "cvtLowRPM":"$cvtlowRPM",
+        "torqueConverterLockupRPM": "$clutchEndRPM",
+        "aggressionSmoothingDown":"$cvtRegressionRate",
+        "cvtAggression":"$cvtAggresionRate",
+        "aggressionHoldOffThrottleDelay":"$cvtRegressionDelay",
+    },
+    "controller": [
+        ["fileName"],
+        ["propAnimation/singleAxisLever", {"name":"singleAxisLever"}],
+
+    ]
+    "singleAxisLever": {
+        "gearCoordinates": [
+            ["gearIndex",   "value"]
+            [1,            0.0]
+            [2,             "$cvtThrottleCurve2"]
+            [3,             "$cvtThrottleCurve3"]
+            [4,             "$cvtThrottleCurve4"]
+            [5,             1.0]
+        ]
+        "shiftSoundNode:":["f2r"]
+        "shiftSoundEventSingleAxisLever": "event:>Vehicle>Interior>Gearshift>automatic_02",
+        "shiftSoundVolumeSingleAxisLever": 0.5,
+    },
+    "flexbodies": [
+        ["mesh", "[group]:", "nonFlexMaterials"],
+        ["pigeon_transmission", ["pigeon_engine","pigeon_transmission"]],
+    ],
+    "nodes": [
+         ["id", "posX", "posY", "posZ"],
+         //--3 Speed Manual--
+         {"selfCollision":false},
+         {"collision":true},
+         {"nodeMaterial":"|NM_METAL"},
+         {"frictionCoef":0.5},
+         {"group":"pigeon_transmission"},
+         {"nodeWeight":9},
+         ["tra1", 0.0, -0.1, 0.31],
+         {"group":""},
+    ],
+    "beams": [
+          ["id1:", "id2:"],
+          {"beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+          {"beamSpring":8001000,"beamDamp":150},
+          {"beamDeform":100000,"beamStrength":"FLT_MAX"},
+          //transmission
+          ["tra1","e1r"],
+          ["tra1","e3r"],
+          ["tra1","e1l"],
+          ["tra1","e3l"],
+          {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1.0, "beamShortBound":1.0},
+    ],
+    "triangles": [
+            ["id1:","id2:","id3:"],
+            {"triangleType":"NONCOLLIDABLE"},
+            ["e1l", "e1r", "tra1"],
+            {"triangleType":"NORMALTYPE"},
+    ],
+},
+}

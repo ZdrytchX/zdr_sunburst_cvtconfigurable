@@ -46,9 +46,9 @@
         ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
         ["$cvtRPM", "range", "rpm", "Engine", 7000, 4500, 8500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
         ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 4500, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
-        ["$cvtAggressionRate", "range", "rpm", "Engine", 0.5, 0.01, 1.5, "Throttle Aggression", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
-        ["$cvtRegressionRate", "range", "rpm", "Engine", 0.1, 0.01, 1.5, "Throttle Regression", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
-        ["$cvtGearRatio", "range", "rpm", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is about 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
+        ["$cvtAggressionRate", "range", "x", "Engine", 0.5, 0.01, 1.5, "Throttle Attack", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "x", "Engine", 0.1, 0.01, 1.5, "Throttle Retract", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtGearRatio", "range", "x", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is about 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
         ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 8500, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
         ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
         //these dont seem to do anything
