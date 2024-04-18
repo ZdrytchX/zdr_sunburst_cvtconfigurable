@@ -1,49 +1,22 @@
 {
-"pickup_engine_v8_ecu_race_adjustableIdle": {
-    "information":{
-        "authors":"ZdrytchX",
-        "name":"Adjustable Idle Race ECU",
-        "value":3700,
-    },
-    "slotType" : ["pickup_engine_v8_ecu","pickup_engine_v8_6.9_ecu"],//hax
-    "variables": [
-        ["name", "type", "unit", "category", "default", "min", "max", "title", "description"],
-        ["$revLimiterRPM", "range", "rpm", "Engine", 5800, 3500, 9950, "RPM Limit", "RPM where the rev limiter prevents further revving. Set to 9950 for hilarity", {"stepDis":50}],
-        ["$revLimiterCutTime", "range", "s", "Engine", 0.15, 0.01, 0.5, "RPM Limit Cut Time", "How fast the rev limiter cycles", {"stepDis":0.01}],
-        ["$idleRPMSet", "range", "rpm", "Engine", 900, 300, 5000, "Idle RPM", "How short do you want your throttle cable?", {"stepDis":0.01}],
-        ["$highShiftUpRPM", "range", "rpm", "Engine", 5000, 3000, 9000, "Automatic Shift-up RPM", "Assuming you use automatic, this dictates your shift-up rpm", {"stepDis":0.01}],
-    ],
-    "controller": [
-        ["fileName"],
-        ["twoStepLaunch", {"rpmLimit":4000}],
-    ],
-    "mainEngine":{
-        "idleRPM":"$idleRPMSet",
-        "revLimiterRPM":"$revLimiterRPM",
-        "revLimiterType":"timeBased",
-        "revLimiterCutTime":"$revLimiterCutTime",
-    },
-    "vehicleController": {
-        "highShiftUpRPM":"$highShiftUpRPM",
-    },
-},
-"pickup_transmission_CVT_Configurable": {
+"van_transmission_CVT_Configurable": {
     "information":{
         "authors":"ZdrytchX",
         "name":"Carp Virtuous Transmissionual stolen from Hero Cheatsome Bros",
         "value":5200,
     },
-    "slotType" : "pickup_transmission",
+    "slotType" : "van_transmission",
     "slots": [
         ["type", "default", "description"],
         ["pickup_transfer_case","pickup_transfer_case_4WD","Transfer Case", {"coreSlot":true}],
+        ["van_transfer_case","van_transfer_case_4WD","Transfer Case"],
     ],
     "variables": [
         ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
         ["$cvtRPM", "range", "rpm", "Engine", 5300, 3000, 8500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
         ["$cvtlowRPM", "range", "rpm", "Engine", 1000, 500, 3000, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
         ["$cvtAggressionRate", "range", "x", "Engine", 0.5, 0.01, 1, "Throttle Aggression", "Me shrugs", "CVT Response", {"stepDis":0.01}],
-        ["$cvtRegressionRate", "range", "x", "Engine", 0.5, 0.01, 1, "Throttle Smoothing", "Smoothness of CVT response", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "x", "Engine", 0.1, 0.01, 1, "Throttle Smoothing", "Smoothness of CVT response", "CVT Response", {"stepDis":0.01}],
         ["$cvtGearRatio", "range", "x", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
         ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 8500, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
         ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
@@ -59,19 +32,20 @@
     ],
     "torqueConverter": {
         "uiName":"Torque Converter",
-        "converterDiameter": 0.295,
-        "converterStiffness":15,
+        "converterDiameter": 0.302,
+        "converterStiffness":10,
         "couplingAVRatio":0.92,
         "stallTorqueRatio":1.75,
-        "additionalEngineInertia":0.18,
-        "lockupClutchTorque":370,
+        "additionalEngineInertia":0.23,
+        "lockupClutchTorque":390,
+        "kFactorSmoothing":80,
     },
     "gearbox": {
         "uiName":"Gearbox",
         "minGearRatio":"$=$cvtGearRatio",
         "maxGearRatio":"$=$cvtGearRatio*3.85",
-        "friction": 1.58,
-        "dynamicFriction": 0.00091,
+        "friction": 1.68,
+        "dynamicFriction": 0.0012,
         "torqueLossCoef": 0.015,
         "oneWayViscousCoef":60,
         "parkLockTorque":2500,
@@ -96,18 +70,6 @@
         "cvtAggression":"$cvtAggresionRate",
         "aggressionHoldOffThrottleDelay":"$cvtRegressionDelay",
     },
-    /*
-    "flexbodies": [
-         ["mesh", "[group]:", "nonFlexMaterials"],
-         ["sunburst_transmission_awd", ["sunburst_engine","sunburst_transmission"]],
-         ["sunburst_auto", ["sunburst_body"]],
-    ],
-    */
-    
-    "flexbodies": [
-        ["mesh", "[group]:", "nonFlexMaterials"],
-        ["gavril_v8_pickup_transmission", ["pickup_engine","pickup_transmission"]],
-    ],
     "controller": [
         ["fileName"],
         ["propAnimation/singleAxisLever", {"name":"singleAxisLever"}],
@@ -126,16 +88,20 @@
         "shiftSoundEventSingleAxisLever": "event:>Vehicle>Interior>Gearshift>automatic_02",
         "shiftSoundVolumeSingleAxisLever": 0.5,
     },
+    "flexbodies": [
+        ["mesh", "[group]:", "nonFlexMaterials"],
+        ["gavril_v8_van_transmission", ["van_engine","van_transmission"]],
+    ],
     "nodes": [
          ["id", "posX", "posY", "posZ"],
-         //--CVT--
          {"selfCollision":false},
          {"collision":true},
-         {"nodeMaterial":"|NM_METAL"},
+         //--6 Speed Auto-
          {"frictionCoef":0.5},
-         {"group":"pickup_transmission"},
-         {"nodeWeight":32.9},
-         ["tra1", 0.0, -0.41, 0.46],
+         {"nodeMaterial":"|NM_METAL"},
+         {"nodeWeight":37.6},
+         {"group":"van_transmission"},
+         ["tra1", 0.0, -0.59, 0.48],
          {"group":""},
     ],
     "beams": [

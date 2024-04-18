@@ -1,6 +1,6 @@
 {
   "format":2,
-  "licenseName":"KNK-3224",
+  "licenseName":"SSP-7477",
   "mainPartName":"scintilla",
   "model":"scintilla",
   "paints":[
@@ -209,12 +209,10 @@
     "$cvtRPM":8000,
     "$finaldrive_F":2.8,
     "$finaldrive_R":2.8,
-    "$fuel_L":5,
-    "$fuel_R":5,
     "$lsdlockcoef_R":0.2,
     "$lsdlockcoefrev_R":0,
     "$lsdpreload_R":250,
-    "$n2o_gear":2,
+    "$n2o_gear":1,
     "$n2o_power":250,
     "$n2o_rpm":4000,
     "$revLimiterCutTime":0.1,

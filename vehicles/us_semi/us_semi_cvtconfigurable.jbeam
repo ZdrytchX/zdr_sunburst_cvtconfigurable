@@ -15,10 +15,10 @@
     */
     "variables": [
         ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
-        ["$cvtRPM", "range", "rpm", "Engine", 1900, 1200, 3200, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtRPM", "range", "rpm", "Engine", 2200, 1200, 3200, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
         ["$cvtlowRPM", "range", "rpm", "Engine", 800, 500, 1200, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
-        ["$cvtAggressionRate", "range", "x", "Engine", 0.3, 0.01, 1.5, "Throttle Attack", "How responsive the throttle is (at the cost of delayed torque)", "CVT Response", {"stepDis":0.01}],
-        ["$cvtRegressionRate", "range", "x", "Engine", 0.2, 0.01, 1.5, "Throttle Retract", "How quick the rpm reduces (at the cost of delayed torque reduction)", "CVT Response", {"stepDis":0.01}],
+        ["$cvtAggressionRate", "range", "x", "Engine", 0.3, 0.01, 1, "Throttle Aggression", "Me shrugs", "CVT Response", {"stepDis":0.01}],
+        ["$cvtRegressionRate", "range", "x", "Engine", 0.2, 0.01, 1, "Throttle Smoothing", "Smoothness of CVT response", "CVT Response", {"stepDis":0.01}],
         ["$cvtGearRatio", "range", "x", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
         ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 3000, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
         ["$cvtRegressionDelay", "range", "s", "Engine", 1.5, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
@@ -42,7 +42,7 @@
         "converterStiffness":"$torqueConverterStiffness",
         "couplingAVRatio":"$torqueCouplingTolerance",
         "stallTorqueRatio":"$torqueStallRatio",
-        "lockupClutchTorque":1300,
+        "lockupClutchTorque":2700,//1300
         "additionalEngineInertia":1.5,
     },
     "gearbox": {
