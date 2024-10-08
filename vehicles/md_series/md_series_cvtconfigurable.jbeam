@@ -1,57 +1,20 @@
 {
-"us_semi_transmission_CVT_Configurable": {
+"md_series_CVT_Configurable": {
     "information":{
         "authors":"ZdrytchX",
         "name":"Poor Man's Edison: Constant Velocity Transmission",
         "value":2200,
     },
-    "slotType" : "us_semi_transmission",
-    "controller": [
-        ["fileName"],
-		["driveModes", {"name":"rangeboxControl"}],
-        ["4wd", {"driveModesTransfercaseNames":["rangeboxControl"], "driveModesRangeNames":["rangeboxControl"]}],
-    ],
-    "splitterControl":{
-        "uiName": "Splitter"
-        "quickAccessTitle":"Splitter"
-        "quickAccessIcon":"radial_highrangebox"
-        "quickAccessLevel":"/powertrain/"
-        "enabledModes":["hi", "low"]
-        "defaultMode": "hi"
-        "modes": {
-            "hi": {
-                "name": "Cruise",
-                "order": 10,
-                "settings": [
-                    ["type"]
-                    ["powertrainDeviceMode", {"deviceName":"rangebox", "mode":"low"}]
-                    ["electricsValue", {"electricsName":"splitter_state", "value":1}]
-                    ["simpleControlButton", {"buttonId":"splitter", "icon":"powertrain_rangebox_low", "uiName":"Splitter"}]
-                    ["quickAccess", {"icon":"powertrain_rangebox_low"}]
-                ],
-            },
-            "low": {
-                "name": "Haul",
-                "order": 20,
-                "settings": [
-                    ["type"]
-                    ["powertrainDeviceMode", {"deviceName":"rangebox", "mode":"high"}]
-                    ["electricsValue", {"electricsName":"splitter_state", "value":-1}]
-                    ["simpleControlButton", {"buttonId":"splitter", "icon":"powertrain_rangebox_high", "uiName":"Splitter"}]
-                    ["quickAccess", {"icon":"powertrain_rangebox_high"}]
-                ],
-            },
-        }
-    },
+    "slotType" : "md_series_transmission",
     "variables": [
         ["name", "type", "unit", "category", "default", "min", "max", "title", "description", "subCategory"],
-        ["$cvtRPM", "range", "rpm", "Engine", 2200, 1200, 3500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
-        ["$cvtlowRPM", "range", "rpm", "Engine", 800, 500, 1200, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
+        ["$cvtRPM", "range", "rpm", "Engine", 2200, 1200, 5500, "Maximum RPM", "Target RPM at maximum throttle", "CVT RPM", {"stepDis":50}],
+        ["$cvtlowRPM", "range", "rpm", "Engine", 800, 500, 2200, "Minimum RPM", "Minimum target RPM", "CVT RPM", {"stepDis":50}],
         ["$cvtAggressionRate", "range", "x", "Engine", 0.3, 0.01, 1, "Throttle Aggression", "Me shrugs", "CVT Response", {"stepDis":0.01}],
         ["$cvtRegressionRate", "range", "x", "Engine", 0.2, 0.01, 1, "Throttle Smoothing", "Smoothness of CVT response", "CVT Response", {"stepDis":0.01}],
         ["$cvtGearRatio", "range", "x", "Engine", 0.7, 0.1, 2, "Torque Ratio", "Maximum torque ratio is 3.85x this value. You pick the minimum torque ratio", "CVT RPM", {"stepDis":0.01}],
         ["$clutchEndRPM", "range", "rpm", "Engine", 1800, 0, 3000, "Torque Converter Lockup RPM", "RPM at which the Torque Converter is fully locked up", "CVT RPM", {"stepDis":50}],
-        ["$cvtRegressionDelay", "range", "s", "Engine", 1.5, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
+        ["$cvtRegressionDelay", "range", "s", "Engine", 0, 0, 10, "Torque Ratio Hold-off Delay", "Ensures you have power availability for short duration after reducing throttle", "CVT Response", {"stepDis":0.05}],
         //these dont seem to do anything
         ["$cvtThrottleCurve2", "range", "x", "Engine", 0.4, 0.01, 0.99, "Throttle Target RPM Curve 1", "Weaker Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
         ["$cvtThrottleCurve3", "range", "x", "Engine", 0.55, 0.01, 0.99, "Throttle Target RPM Curve 2", "Middle Throttle target RPM coefficient", "CVT Response Curve", {"stepDis":0.01,"hideInUI":true}],
@@ -64,10 +27,9 @@
         ["type", "name", "inputName", "inputIndex"],
         ["torqueConverter", "torqueConverter", "mainEngine", 1],
         ["cvtGearbox", "gearbox", "torqueConverter", 1],
-        ["rangeBox", "rangeboxControl", "gearbox", 1, {"gearRatios":[1.00,3.7], "uiName":"Rangebox"}],
-        ["shaft", "rangebox", "rangeboxControl", 1],
+        ["shaft", "transRangebox", "gearbox", 1],
     ],
-    "torqueConverter": {
+        "torqueConverter": {
         "uiName":"Torque Converter",
         "converterDiameter":0.435,
         "converterStiffness":"$torqueConverterStiffness",
@@ -108,8 +70,9 @@
     },
     "flexbodies": [
          ["mesh", "[group]:", "nonFlexMaterials"],
-         ["us_semi_transmission", ["us_semi_transmission"]],
-         ["us_semi_transmission_hoses", ["us_semi_transmission"]],
+         ["md_series_transmission", ["md_series_transmission"]],
+         ["md_series_transmission_hoses", ["md_series_transmission"]],
+         ["md_series_transmission_shifter", ["md_series_transmission"]],
     ],
     "controller": [
         ["fileName"],
@@ -130,58 +93,58 @@
         "shiftSoundVolumeSingleAxisLever": 0.5,
     },
     "nodes": [
-         ["id", "posX", "posY", "posZ"],
+         ["id",    "posX", "posY", "posZ"],
          {"selfCollision":false},
          {"collision":true},
          //--TRANSMISSION CONE--
          {"nodeWeight":100},
          {"frictionCoef":0.5},
          {"nodeMaterial":"|NM_METAL"},
-         {"group":"us_semi_transmission"},
-         ["tra1",  0.00, -1.153, 0.643],
-         ["tra2r",-0.27, -2.286, 0.412],
-         ["tra2l", 0.27, -2.286, 0.412],
-         ["tra3r",-0.27, -2.262, 0.962],
-         ["tra3l", 0.27, -2.262, 0.962],
+         {"group":"md_series_transmission"},
+         ["tra1",  0.00,   0.075,  0.780],
+         ["tra2r",-0.27,  -0.715,  0.578],
+         ["tra2l", 0.27,  -0.715,  0.578],
+         ["tra3r",-0.27,  -0.715,  1.054],
+         ["tra3l", 0.27,  -0.715,  1.054],
          {"group":""},
     ],
     "beams": [
-          ["id1:", "id2:"],
+          ["id1:",  "id2:"],
           //--TRANSMISSION CONE--
           {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1, "beamShortBound":1},
           {"beamSpring":32000800,"beamDamp":1600},
           {"beamDeform":1500000,"beamStrength":"FLT_MAX"},
-          ["tra1","tra2r"],
-          ["tra1","tra2l"],
-          ["tra1","tra3r"],
-          ["tra1","tra3l"],
-          ["tra2r","tra2l"],
-          ["tra3r","tra3l"],
-          ["tra2r","tra3r"],
-          ["tra2l","tra3l"],
-          ["tra2r","tra3l"],
-          ["tra2l","tra3r"],
+          ["tra1",  "tra2r"],
+          ["tra1",  "tra2l"],
+          ["tra1",  "tra3r"],
+          ["tra1",  "tra3l"],
+          ["tra2r", "tra2l"],
+          ["tra3r", "tra3l"],
+          ["tra2r", "tra3r"],
+          ["tra2l", "tra3l"],
+          ["tra2r", "tra3l"],
+          ["tra2l", "tra3r"],
           //attach to engine
-          ["tra1","en2r"],
-          ["tra1","en2l"],
-          ["tra3l","en1l"],
-          ["tra3r","en1r"],
-          ["tra2r","en2r"],
-          ["tra2r","en2l"],
-          ["tra2r","en4r"],
-          ["tra2r","en4l"],
-          ["tra2l","en2r"],
-          ["tra2l","en2l"],
-          ["tra2l","en4r"],
-          ["tra2l","en4l"],
-          ["tra3r","en2r"],
-          ["tra3r","en2l"],
-          ["tra3r","en4r"],
-          ["tra3r","en4l"],
-          ["tra3l","en2r"],
-          ["tra3l","en2l"],
-          ["tra3l","en4r"],
-          ["tra3l","en4l"],
+          ["tra1",  "en2r"],
+          ["tra1",  "en2l"],
+          ["tra3l", "en1l"],
+          ["tra3r", "en1r"],
+          ["tra2r", "en2r"],
+          ["tra2r", "en2l"],
+          ["tra2r", "en4r"],
+          ["tra2r", "en4l"],
+          ["tra2l", "en2r"],
+          ["tra2l", "en2l"],
+          ["tra2l", "en4r"],
+          ["tra2l", "en4l"],
+          ["tra3r", "en2r"],
+          ["tra3r", "en2l"],
+          ["tra3r", "en4r"],
+          ["tra3r", "en4l"],
+          ["tra3l", "en2r"],
+          ["tra3l", "en2l"],
+          ["tra3l", "en4r"],
+          ["tra3l", "en4l"],
 
           //support beams for anti clipping
           {"beamType":"|SUPPORT", "beamLongBound":5},
@@ -194,23 +157,21 @@
           ["tra3l", "ff4r"],
           ["tra2r", "ff14l"],
           ["tra2l", "ff14r"],
-          ["tra1", "ff5r"],
-          ["ff5l", "tra1"],
 
           //to conventional cab
           {"optional":true},
           ["tra3r", "b11r"],
-          ["b7r", "tra3r"],
+          ["b7r",   "tra3r"],
           ["tra3r", "b11l"],
           ["tra3r", "b7l"],
           ["tra3l", "b11l"],
           ["tra3l", "b7l"],
           ["tra3l", "b11r"],
-          ["tra1", "b9l"],
-          ["tra1", "b9r"],
-          ["tra1", "b8l"],
-          ["tra1", "b8r"],
-          ["tra1", "brg1"],
+          ["tra1",  "b9l"],
+          ["tra1",  "b9r"],
+          ["tra1",  "b8l"],
+          ["tra1",  "b8r"],
+          ["tra1",  "brg1"],
 
           //to cabover cab
           ["tra2l", "cab53l"],
@@ -223,24 +184,24 @@
           ["tra2r", "cab53l"],
           ["tra3r", "cab52l"],
           ["tra3l", "cab52r"],
-          ["tra1", "cab73r"],
-          ["tra1", "cab73l"],
-          ["tra1", "cab63r"],
-          ["tra1", "cab63l"],
-          ["tra1", "cab83r"],
-          ["tra1", "cab83l"],
+          ["tra1",  "cab73r"],
+          ["tra1",  "cab73l"],
+          ["tra1",  "cab63r"],
+          ["tra1",  "cab63l"],
+          ["tra1",  "cab83r"],
+          ["tra1",  "cab83l"],
           {"optional":false},
           {"beamPrecompression":1, "beamType":"|NORMAL", "beamLongBound":1, "beamShortBound":1},
     ],
     "triangles": [
-            ["id1:","id2:","id3:"],
-            {"group":"us_semi_engine"},
+            ["id1:",  "id2:",  "id3:"],
+            {"group":"md_series_engine"},
             {"groundModel":"metal"},
             {"dragCoef":3},
             ["tra2l", "tra2r", "tra1"],
-            ["tra2l", "tra1", "tra3l"],
-            ["tra3l", "tra1", "tra3r"],
-            ["tra3r", "tra1", "tra2r"],
+            ["tra2l", "tra1",  "tra3l"],
+            ["tra3l", "tra1",  "tra3r"],
+            ["tra3r", "tra1",  "tra2r"],
             ["tra3r", "tra2r", "tra2l"],
             ["tra3r", "tra2l", "tra3l"],
             {"group":""},
